@@ -1,0 +1,28 @@
+https://blog.csdn.net/u013309870/article/details/69952085      //参考网址
+
+/**
+ * class TreeNode {
+ *    int val;
+ *    TreeNode left = null;
+ *    TreeNode right = null;
+ *    public TreeNode(int val) {
+ *        this.val = val;
+ *    }
+ * }
+ */
+ 
+递归解法:
+public class Tree {
+  public static void fix(TreeNode root) {
+      if(root == null) {
+          return ;
+      }
+      TreeNode demo = root.left;
+      root.left = root.right;
+      root.right = demo;
+      fix(root.left);
+      fix(root.right);
+  }
+}
+
+非递归解法：
