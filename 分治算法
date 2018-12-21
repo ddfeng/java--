@@ -1,0 +1,80 @@
+  基本概念：字面理解就是分而治之，就是把一个复杂的问题分成两个或者更多的相同或者相似的子问题，再把子问题分成更小的问题，
+知道最后子问题可以简单地直接求解，原问题的解就是子问题的合并。
+　这个技巧是很多算法的基础，比如快排，归并，傅里叶变换。
+ 
+ 分治算法使用场景：
+    １：该问题的规模缩小到一定的成都就可以很容易的解决
+    ２：该问题可以分解为若干个规模较小的问题，也就是该问题具有最优子结构性质
+    ３：利用该问题可以分解出的子问题的解可以合并成为该问题的解
+    ４：该问题分解出的各种子问题是相互独立的，也就是子问题之间不包含公共的子子问题
+ 分治算法使用步骤：
+    １：分解，把原问题分解成为若干个规模较小，相互独立，与原问题形式相同的子问题
+    ２：解决，将小问题解决
+    ３：合并，将各种子问题的解合并成为原问题的解
+ 分治算法的一些经典问题：
+    １：二分搜索
+    ２：大整数乘法
+    ３：Strassen矩阵乘法
+    ４：棋盘覆盖
+    ５：合并排序
+    ６：快速排序
+    ７：线性时间选择
+    ８：最接近点对问题
+    ９：循环赛日程表
+    １０：汉诺塔
+
+/**
+ * 二分查找
+ */
+public static void main(String[] args) {
+    int[] a = {1,2,3,4,5,6,7,8,9};
+    int pos = bSearch(a, 0, a.length-1, 1);
+    System.out.println(pos);
+}
+public static int bSearch(int[] data, int left, int right, int key) {
+    //获取中间位置
+    int middle = (left + right) / 2;
+    //比较key值，如果相等，返回当前位置，否则确认新的查找空间
+    if(data[middle] == key) {
+        return middle;
+    }else if(data[middle] > key) {
+        return bSearch(data,left,middle-1,key);
+    }else {
+        return bSearch(data,middle+1,right,key); 
+    }
+}
+
+
+/**
+ * 汉诺塔问题
+ */
+public class Moved {
+    private static int count = i;
+    public static void main(String[] args) {
+        moved(4, "第一根柱子", "第二根柱子", "第三根柱子");
+    }
+    
+    /**
+     * @param i 圆盘数量
+     * @param a 圆盘初始所在塔座
+     * @param b 圆盘将要移动到的塔座
+     * @param c 辅助圆盘移动的塔座
+     */
+    public static void moved(int i, String a, String b, String c) {
+        if(i == 1) {
+            disPaly(1,a,b);
+        }else {
+            //将i-1根圆盘由a移动到c
+            moved(i-1, a, c, b);
+            //将圆盘i由a移动到b
+            disPaly(i, a, b);
+            //将i-1根圆盘由c移动到a
+            moved(i-1, c, b, a);
+        }
+    }
+    
+    public static void disPaly(int i, String a, String b) {
+        System.out.println("第" + count + "步：移动到第" + i + "个塔从" + a + "到" + b);
+        count++;
+    }
+}
