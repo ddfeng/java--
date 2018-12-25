@@ -1,0 +1,38 @@
+kafka是一个分布式的、支持分区的、多副本的、基于zookeeper协调的分布式消息系统。
+kafka最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批量处理系统、低延迟的实时系统、storm/spark流式处理引擎、消息服务等。
+消息队列的性能好坏，其文件存储机制设计是衡量一个消息队列服务技术水平的最关键指标之一。
+
+kafka的特性：
+  高吞吐量、低延迟
+  可扩展性：kafka集群支持热扩散
+  持久性、可靠性：消息被持久化到本地磁盘，并且支持数据备份防止数据丢失
+  容错性：允许集群中的节点失败
+  高并发：支持数千个客户端同时读写
+
+kafka的使用场景：
+  日志收集：一个公司可以用kafka收集各种服务的log，通过kafka以统一接口服务的方式开放给各种consumer，比如hadoop，Hbase，Silr等。
+  消息系统：解耦合生产者和消费者、缓存消息等。
+  用户活动追踪：kafka经常被用来记录web用户或者app用户的各种活动，如浏览网页、搜索、点击等活动，这些活动被各个服务器发布到kafka的topic中，
+然后订阅者通过这些topic来做实时的监控分析，或者装载到hadoop、数据仓库中做离线分析和挖掘。
+  运营指标：kafka也经常用来记录运营监控数据，包括收集各种分布式应用的数据，生产各种操作的集中反馈，比如报警和报告。
+  事件源。
+  
+kafka的设计思想：
+  kafka broker leader的选举：kafka broker集群受zookeeper管理。所有的kafka broker节点一起去zookeeper上注册一个临时节点，因为只有
+一个kafka broker会注册成功，其他都会失败。所以这个成功在zookeeper上注册临时节点的这个kafka broker会成为kafka broker Controller，其他
+的kafka broker叫做kafka broker follower。(这个过程叫做Controller在zookeeper上注册watch)
+  如果这个kafka broker Controller宕机了，那么所有其他节点重复那个过程再选出来一个，如果全挂了那么久把新的leader设置为-1，等待ISR列表中的一个
+活过来，并且选择它为leader。
+
+Consumergroup:
+  各个consumer(consumer线程)可以组成一个组(Consumer group),partition中的每个message只能被组(Consumer group)中的一个consumer
+(consumer线程)消费，如果一个message可以被多个consumer(consumer线程)消费的话，那么这些consumer必须在不同的组。
+  新的consumer默认从patition队列最头端最新的地方开始阻塞地读message，它不能像AMQ那样多个BET作为consumer去互斥的(for updata悲观锁)并发
+处理message，这是因为多一个BET取消费一个QUEUE中的数据的时候，由于要保证不能多个线程拿到同一条message，所以就需要行级悲观锁，导致consumer
+性能下降，吞吐量不够，而且kafka为了保证吞吐量，只允许同一个consumer group下的一个consumer线程去访问一个partition，如果觉得效率不高的时候，
+可以加partition的数量来横向扩展，那么再加新的consumer thread取消费。如果多个不同业务都需要这个topic的数据，起多个consumer group就好了，
+大家都顺序的读取message，offsite的值互不影响，这样没有锁竞争，充分发挥了横向的扩展性，吞吐量极高，这也就形成了分布式消费的概念。
+  当启动一个consumer group去消费一个topic的时候，无论topic中有多少个partition，无论我们consumer group里边配置了多少个consumer thread
+,这个consumer group下边的所有consumer thread一定会消费掉所有的partition，即使一个consumer group下边只有一个consumer thread，那么这个
+consumer thread也会消费所有的partition,因此，最好的设计就是group下有多少的consumer thread，那么就有多少的partition，这样效率是最高的。
+  
